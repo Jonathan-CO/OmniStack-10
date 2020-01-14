@@ -1,6 +1,13 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const config = require('./src/config');
 
 const app = express();
+mongoose.connect(config.connectionString, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+ 
 app.use(express.json());
 app.post('/users', (req, res)=>{ 
     console.log(req.body);
