@@ -6,7 +6,6 @@
     display: flex;
     flex-direction: row; /* Td dentro da app(aside) fique lado a lado, em uma linha  */
     align-items: flex-start; /* alinha os elementos(aside e main) no topo da app*/
-
 }
 
 #app main{
