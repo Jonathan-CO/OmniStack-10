@@ -226,5 +226,5 @@ GitHub.sublime-settings
 !.vscode/extensions.json 
 .history
 
-steps
-/config/db.js
+backend/steps
+backend/src/config.js
