@@ -1,4 +1,6 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
+
+import api from './services/api';
 
 import './global.css'
 import './app.css'
@@ -7,25 +9,40 @@ import './main.css'
 
 
 function App() {
+
+  //GET
+  const [devs, setDevs] = useState([]);
+
+
+  // POST
   const [github_username, setGithub_username] = useState('');
   const [techs, setTechs] = useState([]);
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
 
-  async function handleAddDev(e){
+  async function handleAddDev(e) {
     e.preventDefault();
+    
+    const response = await api.post('/devs', {
+      github_username,
+      techs,
+      latitude,
+      longitude,
+    })
+    setGithub_username('');
+    setTechs('');
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     navigator.geolocation.getCurrentPosition(
-      (position) =>{
-        const {latitude, longitude} = position.coords;
+      (position) => {
+        const { latitude, longitude } = position.coords;
         setLatitude(latitude);
         setLongitude(longitude);
 
         console.log(position)
       },
-      (err) =>{
+      (err) => {
         console.log(err);
       },
       {
@@ -35,6 +52,14 @@ function App() {
 
   }, []);
 
+  useEffect(() =>{
+    async function loadDevs(){
+      const response = await api.get('/devs');
+      setDevs(response.data);
+    }
+    loadDevs();
+  }, []);
+
   return (
     <div id="app">
       <aside>
@@ -42,74 +67,44 @@ function App() {
         <form onSubmit={handleAddDev}>
           <div className="input-block">
             <label htmlFor="github_username">Usuário do Github</label>
-            <input name="github_username" id="github_username" required value={github_username} onChange ={e=>setGithub_username(e.target.value)}/>
+            <input name="github_username" id="github_username" required value={github_username} onChange={e => setGithub_username(e.target.value)} />
           </div>
           <div className="input-block">
             <label htmlFor="techs">Tecnologias</label>
-            <input name="techs" id="techs" required value={techs} onChange={e=>setTechs(e.targetvalue)}/>
+            <input name="techs" id="techs" required value={techs} onChange={e => setTechs(e.target.value)} />
           </div>
 
           <div className="input-group">
             <div className="input-block">
               <label htmlFor="latitude">Latitude</label>
-              <input type="number" name="latitude" id="latitude" required value={latitude} onChange = { e=> setLatitude(e.target.value)}/>
+              <input type="number" name="latitude" id="latitude" required value={latitude} onChange={e => setLatitude(e.target.value)} />
             </div>
 
             <div className="input-block">
               <label htmlFor="longitude">Longitude</label>
-              <input type="number" name="longitude" id="longitude" required value={longitude} onChange = { e=> setLongitude(e.target.value)}/>
+              <input type="number" name="longitude" id="longitude" required value={longitude} onChange={e => setLongitude(e.target.value)} />
             </div>
           </div>
           <button type="submit">Salvar</button>
         </form>
       </aside>
-     
+
       <main>
         <ul>
-          <li className="dev-item">
+          {devs.map(dev =>(
+            <li key={dev._id} className="dev-item">
             <header>
-              <img src="https://avatars3.githubusercontent.com/u/31313701?s=460&v=4" alt="Jonathan-CO"/>
+              <img src={dev.avatar_url} alt={dev.name} />
               <div className="user-info">
-                <strong>Jonathan da Cunha Oliveira</strong>
-                <span>ReactJS, React Native, NodeJS</span>
+                <strong>{dev.name}</strong>
+                <span>{dev.techs.join(', ')}</span>
               </div>
             </header>
-            <p>Biografia de Jonathan da Cunha Oliveira. Jonathan da Cunha Oliveira é u mdev Full Stack, apaixonado pelo que faz</p>
-            <a href="https://github.com/Jonathan-CO">Acessar perfil no github</a>
+            <p>{dev.bio}</p>
+            <a href={`https://github.com/${dev.github_username}`}>Acessar perfil no github</a>
           </li>
-          <li className="dev-item">
-            <header>
-              <img src="https://avatars3.githubusercontent.com/u/31313701?s=460&v=4" alt="Jonathan-CO"/>
-              <div className="user-info">
-                <strong>Jonathan da Cunha Oliveira</strong>
-                <span>ReactJS, React Native, NodeJS</span>
-              </div>
-            </header>
-            <p>Biografia de Jonathan da Cunha Oliveira. Jonathan da Cunha Oliveira é u mdev Full Stack, apaixonado pelo que faz</p>
-            <a href="https://github.com/Jonathan-CO">Acessar perfil no github</a>
-          </li>
-          <li className="dev-item">
-            <header>
-              <img src="https://avatars3.githubusercontent.com/u/31313701?s=460&v=4" alt="Jonathan-CO"/>
-              <div className="user-info">
-                <strong>Jonathan da Cunha Oliveira</strong>
-                <span>ReactJS, React Native, NodeJS</span>
-              </div>
-            </header>
-            <p>Biografia de Jonathan da Cunha Oliveira. Jonathan da Cunha Oliveira é u mdev Full Stack, apaixonado pelo que faz</p>
-            <a href="https://github.com/Jonathan-CO">Acessar perfil no github</a>
-          </li>
-          <li className="dev-item">
-            <header>
-              <img src="https://avatars3.githubusercontent.com/u/31313701?s=460&v=4" alt="Jonathan-CO"/>
-              <div className="user-info">
-                <strong>Jonathan da Cunha Oliveira</strong>
-                <span>ReactJS, React Native, NodeJS</span>
-              </div>
-            </header>
-            <p>Biografia de Jonathan da Cunha Oliveira. Jonathan da Cunha Oliveira é u mdev Full Stack, apaixonado pelo que faz</p>
-            <a href="https://github.com/Jonathan-CO">Acessar perfil no github</a>
-          </li>
+          ))}
+          
         </ul>
       </main>
     </div>
