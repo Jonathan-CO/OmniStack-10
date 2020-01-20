@@ -1,21 +1,25 @@
-import React, {useEffect, useState} from 'react';
-import MapView, {Marker, Callout} from 'react-native-maps';
-import {StyleSheet, Image, View, Text, TextInput, TouchableOpacity} from 'react-native';
-import {requestPermissionsAsync, getCurrentPositionAsync} from 'expo-location'
-import {MaterialIcons} from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import MapView, { Marker, Callout } from 'react-native-maps';
+import { StyleSheet, Image, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { requestPermissionsAsync, getCurrentPositionAsync } from 'expo-location'
+import { MaterialIcons } from '@expo/vector-icons';
+import api from '../services/api';
 
-
-function Main({navigation}){
+function Main({ navigation }) {
     const [currentRegion, setCurrentRegion] = useState(null);
+    const [devs, setDevs] = useState([]);
+    const [techs, setTechs] = useState('');
+
     // const [longitude, setLongitude] = useState(null);
-    useEffect(()=>{
-        async function loadInitialPosition(){
-            const {granted} = await requestPermissionsAsync(); // retorna um objeto com várias informações (canAskAgain, expires, granted, status, android, ios)
-            if(granted){
-                const {coords} = await getCurrentPositionAsync({
+
+    useEffect(() => {
+        async function loadInitialPosition() {
+            const { granted } = await requestPermissionsAsync(); // retorna um objeto com várias informações (canAskAgain, expires, granted, status, android, ios)
+            if (granted) {
+                const { coords } = await getCurrentPositionAsync({
                     enableHighAccuracy: true,
                 });
-                const {latitude, longitude} = coords;
+                const { latitude, longitude } = coords;
                 setCurrentRegion({
                     latitude,
                     longitude,
@@ -29,36 +33,63 @@ function Main({navigation}){
     }, []);
 
 
-    if(!currentRegion){
+    async function loadDevs() {
+        const { latitude, longitude } = currentRegion;
+        const response = await api.get('/search', {
+            params: {
+                longitude,
+                latitude,
+                techs: techs
+            }
+        });
+        setDevs(response.data.devs);
+        // console.log(response.data);
+    }
+
+    function handleRegionChanged(region) {
+        console.log(region);
+        setCurrentRegion(region);
+    }
+
+    if (!currentRegion) {
         return null;
     }
 
     return (
         <>
-            <MapView initialRegion={currentRegion} style={styles.map}>
-            <Marker coordinate={{latitude: -18.2375635, longitude: -43.6139873}}>
-                <Image style={styles.image} source={{uri: 'https://avatars3.githubusercontent.com/u/31313701?s=460&v=4'}} />
-                <Callout onPress={()=>{
-                    navigation.navigate('Profile', {github_username: 'Jonathan-CO'});
-                }}>
-                    <View style={styles.callout}>
-                        <Text style={styles.devName}>Jonathan da Cunha</Text>
-                        <Text style={styles.devBio}>Bio de jonathan da Cunha Oliveira</Text>
-                        <Text style={styles.devTechs}> ReacJS, React Native, NodeJS</Text>
-                    </View>
-                </Callout>
-            </Marker>
+            <MapView onRegionChangeComplete={handleRegionChanged} initialRegion={currentRegion} style={styles.map}>
+                {devs.map(dev => (
+                    <Marker key={dev._id} coordinate={{ 
+                        longitude: dev.location.coordinates[0],
+                        latitude: dev.location.coordinates[1], 
+                     }}>
+                        <Image 
+                            style={styles.image} 
+                            source={{ uri: dev.avatar_url }} />
+                        <Callout onPress={() => {
+                            navigation.navigate('Profile', { github_username:  dev.github_username });
+                        }}>
+                            <View style={styles.callout}>
+                    <Text style={styles.devName}>{dev.name}</Text>
+                                <Text style={styles.devBio}>{dev.bio}</Text>
+                                <Text style={styles.devTechs}> {dev.techs.join(', ')}</Text>
+                            </View>
+                        </Callout>
+                    </Marker>
+                ))}
             </MapView>
             <View style={styles.searchForm}>
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Buscar devs por techs"
                     placeholderTextColor="#999"
-                    autoCapitalize= "words"
+                    autoCapitalize="words"
                     autoCorrect={false}
+                    value={techs}
+                    onChandText={setTechs}
                 />
-                <TouchableOpacity onPress={()=>{}} style={styles.loadButton}>
-                     <MaterialIcons name="my-location" size={20} color ="#FFF" />
+                <TouchableOpacity onPress={loadDevs} style={styles.loadButton}>
+                    <MaterialIcons name="my-location" size={20} color="#FFF" />
                 </TouchableOpacity>
             </View>
         </>
@@ -69,37 +100,37 @@ const styles = StyleSheet.create({
     map: {
         flex: 1
     },
-    image:{
+    image: {
         width: 34,
         height: 34,
         borderRadius: 17,
         borderWidth: 4,
         borderColor: '#FFF'
     },
-    callout:{
-        width:260,
+    callout: {
+        width: 260,
     },
-    devName:{
+    devName: {
         fontWeight: 'bold',
-        fontSize:16,
+        fontSize: 16,
     },
-    devBio:{
+    devBio: {
         color: '#666',
         marginTop: 5,
     },
-    devTechs:{
+    devTechs: {
         marginTop: 5
     },
-    searchForm:{
+    searchForm: {
         position: 'absolute',
-        top:20,
+        top: 20,
         left: 20,
-        right:20,
-        zIndex:5,
+        right: 20,
+        zIndex: 5,
         flexDirection: 'row',
     },
-    searchInput:{
-        flex:1,
+    searchInput: {
+        flex: 1,
         height: 50,
         backgroundColor: "#FFF",
         color: '#333',
@@ -114,7 +145,7 @@ const styles = StyleSheet.create({
         },
         elevation: 2,
     },
-    loadButton:{
+    loadButton: {
         width: 50,
         height: 50,
         backgroundColor: '#8E4DFF',
