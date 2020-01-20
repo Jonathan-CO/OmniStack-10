@@ -21,6 +21,7 @@ const Routes = createAppContainer(
     }, {
         defaultNavigationOptions: {
             headerTintColor: '#FFF',
+            headerBackTitleVisible: false, // remove nome anterior ao muda de tela (ios)
             headerStyle:{
                 backgroundColor: '#7d40e7',
             },

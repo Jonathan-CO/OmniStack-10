@@ -4,7 +4,7 @@ import {StyleSheet, Image, View, Text} from 'react-native';
 import {requestPermissionsAsync, getCurrentPositionAsync} from 'expo-location'
 
 
-function Main(){
+function Main({navigation}){
     const [currentRegion, setCurrentRegion] = useState(null);
     // const [longitude, setLongitude] = useState(null);
     useEffect(()=>{
@@ -36,7 +36,9 @@ function Main(){
         <MapView initialRegion={currentRegion} style={styles.map}>
            <Marker coordinate={{latitude: -18.2375635, longitude: -43.6139873}}>
                <Image style={styles.image} source={{uri: 'https://avatars3.githubusercontent.com/u/31313701?s=460&v=4'}} />
-               <Callout>
+               <Callout onPress={()=>{
+                   navigation.navigate('Profile', {github_username: 'Jonathan-CO'});
+               }}>
                    <View style={styles.callout}>
                        <Text style={styles.devName}>Jonathan da Cunha</Text>
                        <Text style={styles.devBio}>Bio de jonathan da Cunha Oliveira</Text>
