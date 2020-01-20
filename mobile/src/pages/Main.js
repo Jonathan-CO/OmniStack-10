@@ -34,16 +34,19 @@ function Main({ navigation }) {
 
 
     async function loadDevs() {
+        console.log(techs);
         const { latitude, longitude } = currentRegion;
         const response = await api.get('/search', {
             params: {
+                // latitude: -18.2343658,
+                // longitude: 43.6068352,
                 longitude,
                 latitude,
                 techs: techs
             }
         });
         setDevs(response.data.devs);
-        // console.log(response.data);
+        console.log(response.data);
     }
 
     function handleRegionChanged(region) {
@@ -86,7 +89,7 @@ function Main({ navigation }) {
                     autoCapitalize="words"
                     autoCorrect={false}
                     value={techs}
-                    onChandText={setTechs}
+                    onChangeText={setTechs}
                 />
                 <TouchableOpacity onPress={loadDevs} style={styles.loadButton}>
                     <MaterialIcons name="my-location" size={20} color="#FFF" />
