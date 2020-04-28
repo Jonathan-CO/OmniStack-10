@@ -11,18 +11,24 @@ function DevForm({onSubmit}) {
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
+            
+            // navigator.geolocation.watchPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
+                
                 setLatitude(latitude);
                 setLongitude(longitude);
-
+                
                 console.log(position)
             },
             (err) => {
-                console.log(err);
+                console.log(err.message);
+                // console.log(`Lat: ${latitude} Lon: ${longitude}`)
             },
             {
                 timeout: 30000,
+                // enableHighAccuracy: true,
+                maximumAge: Infinity
             }
         )
 
